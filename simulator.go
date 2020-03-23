@@ -96,8 +96,8 @@ func destinationToJson(order entity.Order, lat string, lng string) []byte {
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
