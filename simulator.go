@@ -17,6 +17,7 @@ import (
 
 var active []string
 
+// init : loads all the environment variables from .env file
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -43,6 +44,7 @@ func main() {
 	}
 }
 
+// start : starts a new SimulatorWorker process if a new Order is received
 func start(order entity.Order, ch *amqp.Channel) {
 
 	if !stringInSlice(order.Uuid, active) {
@@ -51,10 +53,11 @@ func start(order entity.Order, ch *amqp.Channel) {
 		active = append(active, order.Uuid)
 		go SimulatorWorker(order, ch)
 	} else {
-		fmt.Println("Order", order.Uuid, "was already completed or is on going...")
+		fmt.Println("Order", order.Uuid, "was already completed or is ongoing...")
 	}
 }
 
+// SimulatorWorker : loops through the destinations .txt file, sending positions to the queue
 func SimulatorWorker(order entity.Order, ch *amqp.Channel) {
 
 	f, err := os.Open("destinations/" + order.Destination + ".txt")
@@ -69,7 +72,7 @@ func SimulatorWorker(order entity.Order, ch *amqp.Channel) {
 
 	for scanner.Scan() {
 		data := strings.Split(scanner.Text(), ",")
-		json := destinationToJson(order, data[0], data[1])
+		json := destinationToJSON(order, data[0], data[1])
 
 		time.Sleep(1 * time.Second)
 		queue.Notify(string(json), ch)
@@ -83,7 +86,8 @@ func SimulatorWorker(order entity.Order, ch *amqp.Channel) {
 	queue.Notify(string(json), ch)
 }
 
-func destinationToJson(order entity.Order, lat string, lng string) []byte {
+// destinationToJSON : converts latitude and longitude info into a Destination JSON object
+func destinationToJSON(order entity.Order, lat string, lng string) []byte {
 	dest := entity.Destination{
 		Order: order.Uuid,
 		Lat:   lat,
@@ -93,6 +97,7 @@ func destinationToJson(order entity.Order, lat string, lng string) []byte {
 	return json
 }
 
+// stringInSlice : tries to match a string inside an array of strings
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {

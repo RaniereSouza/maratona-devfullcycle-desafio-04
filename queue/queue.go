@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// Connect : connects to a RabbitMQ running server
 func Connect() *amqp.Channel {
 	dsn := "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@" + os.Getenv("RABBITMQ_DEFAULT_HOST") + ":" + os.Getenv("RABBITMQ_DEFAULT_PORT") + os.Getenv("RABBITMQ_DEFAULT_VHOST")
 	fmt.Println("dsn: ", dsn)
@@ -20,6 +21,7 @@ func Connect() *amqp.Channel {
 	return ch
 }
 
+// StartConsuming : starts listening to messages coming through the specified queue
 func StartConsuming(in chan []byte, ch *amqp.Channel) {
 
 	q, err := ch.QueueDeclare(
@@ -51,6 +53,7 @@ func StartConsuming(in chan []byte, ch *amqp.Channel) {
 	}()
 }
 
+// Notify : emits a message with the specified routing key
 func Notify(payload string, ch *amqp.Channel) {
 
 	err := ch.Publish(
@@ -67,6 +70,7 @@ func Notify(payload string, ch *amqp.Channel) {
 
 }
 
+// failOnError : triggers a fail when an error is received, and logs the failing message
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
