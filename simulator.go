@@ -82,7 +82,7 @@ func SimulatorWorker(order entity.Order, ch *amqp.Channel) {
 		log.Fatal(err)
 	}
 
-	json := destinationToJson(order, "0", "0")
+	json := destinationToJSON(order, "0", "0")
 	queue.Notify(string(json), ch)
 }
 
